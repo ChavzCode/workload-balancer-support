@@ -1,0 +1,2 @@
+export const FIB_TICKER_EFFORT = 5;
+export const PERCENTAGE_INCREASE_ON_WARNING = 30;
