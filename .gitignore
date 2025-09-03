@@ -1,6 +1,7 @@
 node_modules/
 dist/
 build/
+data/
 coverage/
 .env
 .DS_Store

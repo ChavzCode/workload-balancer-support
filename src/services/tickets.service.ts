@@ -1,9 +1,9 @@
 import { FIB_TICKER_EFFORT, PERCENTAGE_INCREASE_ON_WARNING } from "../core/constants/effort.constants";
 import { ONE_HUNDRED, TWO, ZERO } from "../core/constants/numbers.constants";
-import { mapToTicketData } from "../core/mappers/tickets-data.mapper";
-import { getFileData } from "../core/utils/files.util"
+import { mapReqToFileFormat, mapToTicketData } from "../core/mappers/tickets-data.mapper";
+import { getFileData, writeOnFile } from "../core/utils/files.util"
 import { sortingFn } from "../core/utils/sort.util";
-import { SLM, Ticket, TicketRaw, TicketsWorkload } from "../models/tickets-data.model";
+import { AllocateTicketReq, SLM, Ticket, TicketRaw, TicketsWorkload } from "../models/tickets-data.model";
 
 export const getTicketsData = (): TicketsWorkload[] => {
     const records: TicketRaw[] = getFileData('data/tickets.csv');
@@ -29,12 +29,20 @@ export const getTicketsData = (): TicketsWorkload[] => {
             assigneeTickets: tickets
         }
     })
-
+    
     return sortingFn(ticketsWorkload, "estimatedEffort") ?? ticketsWorkload
 }
 
 export const getTicketsComplianceRisk = (): TicketsWorkload[] => {
     return getTicketsData().filter((tickets) => tickets.complianceRisk)
+}
+
+export const allocateTicketResponsability = (data: AllocateTicketReq ) => {
+    const ticket: TicketRaw = mapReqToFileFormat(data);
+
+    writeOnFile('data/tickets.csv', ticket);
+
+    return true;
 }
 
 const calculateTicketEffort = (tickets: Ticket[]): number => {

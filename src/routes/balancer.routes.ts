@@ -1,9 +1,10 @@
 import { Router } from "express";
-import { getAssignmentsController, getWorkloadBalanceController } from "../controllers/balancer.controller";
+import { getAllocateTicketBalancerController, getWhoIsNextController, getWorkloadBalanceController } from "../controllers/balancer.controller";
 
 const router = Router();
 
 router.get("/balancer", getWorkloadBalanceController)
-router.get("/assignments", getAssignmentsController);
+router.get("/balancer/who-is-next", getWhoIsNextController)
+router.get("/balancer/allocate-ticket", getAllocateTicketBalancerController )
 
 export default router; 

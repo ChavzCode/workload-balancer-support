@@ -31,6 +31,10 @@ export interface TicketsWorkload {
     assigneeTickets: Ticket[];
 }
 
+export interface AllocateTicketReq extends Partial<Omit<Ticket, "creationDate" | "client" | "resolutionDate" | "lastUpdate">> {
+    assignee: string
+}
+
 export enum SLM {
     ONTIME = "ontime",
     WARNING = "warning"

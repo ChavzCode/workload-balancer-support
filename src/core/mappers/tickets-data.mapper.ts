@@ -1,4 +1,4 @@
-import { SLM, Ticket, TICKET_STATUS, TicketRaw } from "../../models/tickets-data.model";
+import { AllocateTicketReq, SLM, Ticket, TICKET_STATUS, TicketRaw } from "../../models/tickets-data.model";
 
 export const mapToTicketData = (rawData: TicketRaw[]): Ticket[] => {
     try {
@@ -19,7 +19,22 @@ export const mapToTicketData = (rawData: TicketRaw[]): Ticket[] => {
     } catch (error) {
         return []
     }
-}  
+}
+
+export const mapReqToFileFormat = (data: AllocateTicketReq): TicketRaw => {
+    return {
+        "Mostrar ID": data.id ?? '',
+        "Fecha deseada": "",
+        "Estado de SLM": "Dentro del Objetivo",
+        "Nombre completo de cliente": "OD",
+        Assignee: data.assignee,
+        Resumen: data.resume ?? "Incidente",
+        Estado: data.status ?? "Asignado",
+        "Fecha de última actualización": new Date().toDateString(),
+        "Fecha de resolución": "",
+        "Fecha de creación": "",
+    }
+} 
 
 const slmMapper = (rawSlm: string): SLM  => {
     return rawSlm.includes('Advertencia') ? SLM.WARNING : SLM.ONTIME
