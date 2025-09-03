@@ -16,14 +16,16 @@ CREATE TABLE IF NOT EXISTS members (
 const createTicketsTable = `
 CREATE TABLE IF NOT EXISTS tickets (
   id TEXT PRIMARY KEY,
-  slm TEXT,
-  client TEXT,
-  assignee TEXT,
-  resume TEXT,
-  status TEXT,
-  lastUpdate TEXT,
-  resolutionDate TEXT,
-  creationDate TEXT
+  priority TEXT NOT NULL,
+  is_critical BOOLEAN NOT NULL,
+  creation_date TEXT NOT NULL,
+  status TEXT NOT NULL,
+  summary TEXT NOT NULL,
+  description TEXT NOT NULL,
+  assigned_group TEXT NOT NULL,
+  assignee TEXT NOT NULL,
+  client TEXT NOT NULL,
+  ticket_type TEXT NOT NULL
 );
 `;
 
@@ -35,8 +37,8 @@ CREATE TABLE IF NOT EXISTS assignments (
   title TEXT,
   state TEXT,
   assignee TEXT,
-  storyPoints INTEGER,
-  workItemType TEXT
+  story_points INTEGER,
+  work_item_type TEXT
 );
 `;
 
