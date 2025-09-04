@@ -1,5 +1,5 @@
 export interface AssignmentDbRecord {
-    id?: string;
+    id: string;
     task_id: string;
     assignee: string;
     story_points: number;

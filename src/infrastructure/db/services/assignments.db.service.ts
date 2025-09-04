@@ -1,6 +1,7 @@
 import db from '../database';
 import { AssignmentData } from '../../../models/assignment-data.model';
 import { AssignmentDbRecord } from '../interfaces/assignment-db.model';
+import { mapDbRecordToDomain } from '../mappers/assignment-db.mapper';
 
 export class AssignmentsDbService {
     private static instance: AssignmentsDbService;
@@ -37,12 +38,15 @@ export class AssignmentsDbService {
         return insertMany(assignments);
     }
 
-    public getAllAssignments(): AssignmentDbRecord[] {
-        return db.prepare('SELECT * FROM assignments').all() as AssignmentDbRecord[];
+    public getAllAssignments(): AssignmentData[] {
+        const records = db.prepare('SELECT * FROM assignments').all() as AssignmentDbRecord[];
+        const mappedData = mapDbRecordToDomain(records);
+        return mappedData;
     }
 
-    public getAssignmentsByAssignee(assignee: string): AssignmentDbRecord[] {
-        return db.prepare('SELECT * FROM assignments WHERE assignee = ?').all(assignee) as AssignmentDbRecord[];
+    public getAssignmentsByAssignee(assignee: string): AssignmentData[] {
+        const records = db.prepare('SELECT * FROM assignments WHERE assignee = ?').all(assignee) as AssignmentDbRecord[];
+        return mapDbRecordToDomain(records);
     }
 
     public clearAssignments(): void {
