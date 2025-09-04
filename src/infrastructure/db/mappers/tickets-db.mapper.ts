@@ -8,7 +8,6 @@ export const mapDbRecordToTicket = (record: TicketDbRecord): Ticket => {
         isCritical: record.is_critical === 1,
         creationDate: record.creation_date,
         status: mapTicketStatus(record.status),
-        summary: record.summary,
         description: record.description,
         assignedGroup: record.assigned_group,
         assignee: record.assignee,

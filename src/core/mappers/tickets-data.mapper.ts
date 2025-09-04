@@ -32,7 +32,6 @@ export const mapReqToTicketData = (data: AllocateTicketReq): Ticket => {
         description: data.description || "",
         priority: mappedPriority(data.priority || "Baja"),
         status: mappedStatus(data.status || "Abierto"),
-        summary: data.summary || "",
         ticketType: data.ticketType || "",
         creationDate: new Date().toISOString(),
         isCritical: data.isCritical || false

@@ -7,6 +7,7 @@ import { ticketsDb } from "../infrastructure/db/services/tickets.db.service";
 import { MEMBER_STATUS, TeamMember } from "../core/models/team-member.model";
 import { Workload } from "../core/models/workload-data.model";
 import { groupTicketsByAssignee } from "./tickets.service";
+import { SIGNIFICANT_EFFORT_DIFFERENCE } from "../core/constants/effort.constants";
 
 interface MemberScore extends Workload {
   score: number;
@@ -38,14 +39,17 @@ const calculateMemberScore = (
 };
 
 const sortMembersByPriority = (a: MemberScore, b: MemberScore): number => {
+  const effortDifference = Math.abs(a.effort - b.effort);
+  const maxAllocation = Math.max(a.allocation, b.allocation);
+  const minAllocation = Math.min(a.allocation, b.allocation);
+  const allocationRatio = minAllocation / maxAllocation;
+  const adjustedEffortThreshold = SIGNIFICANT_EFFORT_DIFFERENCE * allocationRatio;
+  if (effortDifference >= adjustedEffortThreshold) {
+    return a.effort - b.effort;
+  }
   if (Math.abs(a.allocation - b.allocation) >= TWO) {
     return b.allocation - a.allocation;
   }
-
-  if (Math.abs(a.effort - b.effort) >= FIVE) {
-    return a.effort - b.effort;
-  }
-
   return b.score - a.score;
 };
 
