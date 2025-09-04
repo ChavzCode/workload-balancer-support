@@ -5,6 +5,6 @@ const router = Router();
 
 router.get("/balancer", getWorkloadBalanceController)
 router.get("/balancer/who-is-next", getWhoIsNextController)
-router.get("/balancer/allocate-ticket", getAllocateTicketBalancerController )
+router.post("/balancer/allocate-ticket", getAllocateTicketBalancerController )
 
 export default router; 

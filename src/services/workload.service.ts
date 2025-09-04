@@ -1,84 +1,126 @@
-import { ONE, ZERO } from "../core/constants/numbers.constants";
-import { TEAM_MEMBERS } from "../core/constants/team-members.constants";
+import { FIVE, ONE, TEN, TWO, ZERO } from "../core/constants/numbers.constants";
 import { SORT_ORDER } from "../core/enums/sort.enums";
 import { sortingFn } from "../core/utils/sort.util";
+import { assignmentsDb } from "../infrastructure/db/services/assignments.db.service";
+import { teamMembersDb } from "../infrastructure/db/services/team-members.db.service";
+import { ticketsDb } from "../infrastructure/db/services/tickets.db.service";
 import { MEMBER_STATUS, TeamMember } from "../models/team-member.model";
 import { Workload } from "../models/workload-data.model";
-import { getAssignmentData } from "./assignment.service";
-import { getTicketsData } from "./tickets.service";
+import { groupTicketsByAssignee } from "./tickets.service";
 
+interface MemberScore extends Workload {
+  score: number;
+  allocation: number;
+}
 
-export const getWorkloadBalance = (sort: boolean = true, sortOrder: SORT_ORDER = SORT_ORDER.ASCENDING): Workload[] => {
-    const assignmentData = getAssignmentData();
-    const ticketsData = getTicketsData()
+const calculateMemberScore = (
+  work: Workload,
+  memberInfo: TeamMember | undefined
+): MemberScore | null => {
+  const allocation = memberInfo?.ticketEffortAllocation ?? ZERO;
+  const currentCapacity = work.effort;
 
-    const workloadMap = new Map<string, number>
+  if (!normalAssignment(memberInfo)) {
+    return null;
+  }
 
-    assignmentData.forEach((item) => {
-        const assignee = item.assignee.toUpperCase();
-        workloadMap.set(assignee, item.workItemsEffort);
-    })
+  const score =
+    allocation > ZERO
+      ? ONE - currentCapacity / (allocation * TEN)
+      : -currentCapacity;
 
-    ticketsData.forEach((item) => {
-        const assignee = item.assignee.toUpperCase();
+  return {
+    member: work.member,
+    effort: work.effort,
+    score,
+    allocation,
+  };
+};
 
-        if (workloadMap.has(assignee)) {
-            const crrEffort = workloadMap.get(assignee) ?? ZERO;
-            const summedEffort = crrEffort + item.estimatedEffort;
-            workloadMap.set(assignee, summedEffort)
-        } else {
-            workloadMap.set(assignee, item.estimatedEffort)
-        };
-    })
+const sortMembersByPriority = (a: MemberScore, b: MemberScore): number => {
+  if (Math.abs(a.allocation - b.allocation) >= TWO) {
+    return b.allocation - a.allocation;
+  }
 
-    const data = Array.from(workloadMap, ([key, value]) => ({
-        member: key,
-        capacity: value
-    }));
+  if (Math.abs(a.effort - b.effort) >= FIVE) {
+    return a.effort - b.effort;
+  }
 
-    if (sort) {
-        return sortingFn(data, "capacity", sortOrder === SORT_ORDER.ASCENDING);
+  return b.score - a.score;
+};
+
+export const getWorkloadBalance = (
+  sort: boolean = true,
+  sortOrder: SORT_ORDER = SORT_ORDER.ASCENDING
+): Workload[] => {
+  const assignmentData = assignmentsDb.getAllAssignments();
+  const ticketsData = groupTicketsByAssignee(ticketsDb.getAllTickets());
+
+  const workloadMap = new Map<string, number>();
+
+  assignmentData.forEach((item) => {
+    const assignee = item.assignee.toUpperCase();
+    workloadMap.set(assignee, item.storyPoints);
+  });
+
+  ticketsData.forEach((item) => {
+    const assignee = item.assignee.toUpperCase();
+
+    if (workloadMap.has(assignee)) {
+      const crrEffort = workloadMap.get(assignee) ?? ZERO;
+      const summedEffort = crrEffort + item.estimatedEffort;
+      workloadMap.set(assignee, summedEffort);
+    } else {
+      workloadMap.set(assignee, item.estimatedEffort);
     }
+  });
 
-    return data;
-}
+  const data = Array.from(workloadMap, ([key, value]) => ({
+    member: key,
+    effort: value,
+  }));
 
-export const whoIsNext = (): Workload  => {
-    const workload = getWorkloadBalance(true, SORT_ORDER.ASCENDING);
+  if (sort) {
+    return sortingFn(data, "effort", sortOrder === SORT_ORDER.ASCENDING);
+  }
 
-    for(let i = ZERO; i < workload.length; i++){
-        const lowerWorkload = workload[i];
-        const memberInfo = getMemberInfo(lowerWorkload.member)
-        const nextLowerWorload = workload[i + ONE];
-        const nextLowerMemberInfo = getMemberInfo(nextLowerWorload.member)
-        const lowerAllocation = (memberInfo?.ticketEffortAllocation ?? ZERO) < (nextLowerMemberInfo?.ticketEffortAllocation ?? ZERO)
-    
-        if(!normalAssignment(memberInfo) || lowerAllocation ){
-            const isNextNormal = normalAssignment(nextLowerMemberInfo)
+  return data;
+};
 
-            if(isNextNormal){
-                return nextLowerWorload
-            } else {
-                continue;
-            }
-        }
+export const whoIsNext = (): Workload => {
+  const workload = getWorkloadBalance(true, SORT_ORDER.ASCENDING);
+  const allMembers: TeamMember[] = teamMembersDb.getAllMembers();
 
-        return lowerWorkload
-    }
+  const memberScores = workload
+    .map((work) => {
+      const memberInfo = getMemberInfo(allMembers, work.member);
+      return calculateMemberScore(work, memberInfo);
+    })
+    .filter((member): member is MemberScore => member !== null);
 
-    return workload[ZERO]
-}
+  const sortedMembers = memberScores.sort(sortMembersByPriority);
 
+  if (sortedMembers.length === 0) {
+    return workload[ZERO];
+  }
 
-const getMemberInfo = (memberName: string): TeamMember | undefined => {
-    return TEAM_MEMBERS.find((tm) => tm.name === memberName)
-}
+  return {
+    member: sortedMembers[ZERO].member,
+    effort: sortedMembers[ZERO].effort,
+  };
+};
+
+const getMemberInfo = (
+  members: TeamMember[],
+  memberName: string
+): TeamMember | undefined => {
+  return members.find((member) => member.name === memberName);
+};
 
 const normalAssignment = (memberInfo?: TeamMember): boolean => {
-    if(memberInfo){
-        return memberInfo?.status === MEMBER_STATUS.NORMAL 
-    } else {
-        return true
-    }
-}
-
+  if (memberInfo) {
+    return memberInfo?.status === MEMBER_STATUS.NORMAL;
+  } else {
+    return true;
+  }
+};
