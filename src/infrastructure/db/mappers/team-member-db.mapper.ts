@@ -1,4 +1,4 @@
-import { MEMBER_STATUS, TeamMember } from "../../../models/team-member.model";
+import { MEMBER_STATUS, TeamMember } from "../../../core/models/team-member.model";
 import { TeamMemberDbRecord } from "../interfaces/team-members-db.model";
 
 export const mapTeamMemberDbRecordToDomain = (

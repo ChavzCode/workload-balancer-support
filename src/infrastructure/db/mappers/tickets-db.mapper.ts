@@ -1,4 +1,4 @@
-import { Priority, Ticket, TicketStatus } from "../../../models/tickets-data.model";
+import { Priority, Ticket, TicketStatus } from "../../../core/models/tickets-data.model";
 import { TicketDbRecord } from "../interfaces/ticket-db.model";
 
 export const mapDbRecordToTicket = (record: TicketDbRecord): Ticket => {

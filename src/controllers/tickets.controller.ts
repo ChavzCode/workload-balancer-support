@@ -1,8 +1,7 @@
-// import {getTicketsComplianceRisk, getTicketsData } from "../services/tickets.service";
 import { SUCESS, SERVER_ERROR } from "../core/constants/http-status.constants";
 import { Response, Request } from "express";
 import { parseFile } from "../core/utils/files.util";
-import { TicketFromCSV } from "../models/tickets-data.model";
+import { TicketFromCSV } from "../core/models/tickets-data.model";
 import {
   mapFileToTicketData,
   mapReqToTicketData,

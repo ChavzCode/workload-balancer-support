@@ -1,7 +1,6 @@
-import { TeamMember } from '../../../models/team-member.model';
+import { TeamMember } from '../../../core/models/team-member.model';
 import db from '../database';
 import { TeamMemberDbRecord } from '../interfaces/team-members-db.model';
-import { mapDbRecordToDomain } from '../mappers/assignment-db.mapper';
 import { mapDomainToDbRecord, mapTeamMemberDbRecordToDomain } from '../mappers/team-member-db.mapper';
 
 export class TeamMembersDbService {

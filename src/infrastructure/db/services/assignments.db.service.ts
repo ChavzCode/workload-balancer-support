@@ -1,5 +1,5 @@
 import db from '../database';
-import { AssignmentData } from '../../../models/assignment-data.model';
+import { AssignmentData } from '../../../core/models/assignment-data.model';
 import { AssignmentDbRecord } from '../interfaces/assignment-db.model';
 import { mapDbRecordToDomain } from '../mappers/assignment-db.mapper';
 

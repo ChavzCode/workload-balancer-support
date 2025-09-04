@@ -4,8 +4,8 @@ import {
 } from "../core/constants/effort.constants";
 import { ONE_HUNDRED, TWO, ZERO } from "../core/constants/numbers.constants";
 import { sortingFn } from "../core/utils/sort.util";
-import { Ticket } from "../models/tickets-data.model";
-import { TicketsWorkload } from "../models/workload-data.model";
+import { Ticket } from "../core/models/tickets-data.model";
+import { TicketsWorkload } from "../core/models/workload-data.model";
 
 export const groupTicketsByAssignee = (
   tickets: Ticket[]

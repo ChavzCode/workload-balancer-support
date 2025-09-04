@@ -1,7 +1,7 @@
 import {
   AssignmentData,
   ItemsByAssignee,
-} from "../models/assignment-data.model";
+} from "../core/models/assignment-data.model";
 import { ZERO } from "../core/constants/numbers.constants";
 
 export const getAssignmentDataGroupedByAssignee = (

@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { SERVER_ERROR, SUCESS } from "../core/constants/http-status.constants";
 import { assignmentsDb } from "../infrastructure/db/services/assignments.db.service";
-import { AssignmentDataFromCSV } from "../models/assignment-data.model";
+import { AssignmentDataFromCSV } from "../core/models/assignment-data.model";
 import { parseFile } from "../core/utils/files.util";
 import { mapFileToAssignmentData } from "../core/mappers/assignment-data.mapper";
 import { getAssignmentDataGroupedByAssignee } from "../services/assignment.service";

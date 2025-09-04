@@ -1,4 +1,4 @@
-import { AssignmentData, AssignmentDataFromCSV } from "../../models/assignment-data.model";
+import { AssignmentData, AssignmentDataFromCSV } from "../models/assignment-data.model";
 
 export const mapFileToAssignmentData = (data: AssignmentDataFromCSV[]): AssignmentData[] => {
     return data.map(item => ({

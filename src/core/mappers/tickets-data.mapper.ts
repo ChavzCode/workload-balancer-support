@@ -1,4 +1,4 @@
-import { AllocateTicketReq, Priority, Ticket, TicketFromCSV, TicketStatus} from "../../models/tickets-data.model";
+import { AllocateTicketReq, Priority, Ticket, TicketFromCSV, TicketStatus} from "../models/tickets-data.model";
 
 export const mapFileToTicketData = (rawData: TicketFromCSV[]): Ticket[] => {
     try {

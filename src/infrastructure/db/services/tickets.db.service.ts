@@ -1,5 +1,5 @@
 import db from "../database";
-import { Ticket } from "../../../models/tickets-data.model";
+import { Ticket } from "../../../core/models/tickets-data.model";
 import { mapDbRecordToTicket } from "../mappers/tickets-db.mapper";
 import { TicketDbRecord } from "../interfaces/ticket-db.model";
 

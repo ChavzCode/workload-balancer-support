@@ -4,8 +4,8 @@ import { sortingFn } from "../core/utils/sort.util";
 import { assignmentsDb } from "../infrastructure/db/services/assignments.db.service";
 import { teamMembersDb } from "../infrastructure/db/services/team-members.db.service";
 import { ticketsDb } from "../infrastructure/db/services/tickets.db.service";
-import { MEMBER_STATUS, TeamMember } from "../models/team-member.model";
-import { Workload } from "../models/workload-data.model";
+import { MEMBER_STATUS, TeamMember } from "../core/models/team-member.model";
+import { Workload } from "../core/models/workload-data.model";
 import { groupTicketsByAssignee } from "./tickets.service";
 
 interface MemberScore extends Workload {
