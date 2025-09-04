@@ -1,18 +1,20 @@
-import { AllocateTicketReq, SLM, Ticket, TICKET_STATUS, TicketRaw } from "../../models/tickets-data.model";
+import { AllocateTicketReq, Priority, Ticket, TicketFromCSV, TicketStatus} from "../../models/tickets-data.model";
 
-export const mapToTicketData = (rawData: TicketRaw[]): Ticket[] => {
+export const mapFileToTicketData = (rawData: TicketFromCSV[]): Ticket[] => {
     try {
         const data = rawData.map((item) => {
             return {
-                id: item["Mostrar ID"],
-                slm: slmMapper(item["Estado de SLM"]),
-                client: item["Nombre completo de cliente"],
-                assignee: item.Assignee,
-                resume: item.Resumen,
-                status: statusMapper(item.Estado),
-                lastUpdate: item["Fecha de última actualización"],
-                resolutionDate: item["Fecha de resolución"],
-                creationDate: item["Fecha de creación"]
+                id: item.NumeroCaso,
+                priority: mappedPriority(item.Prioridad),
+                isCritical: item.Incidencia_Grave === 'Si',
+                creationDate: item.Fecha_Apertura,
+                status: mappedStatus(item.Estado),
+                summary: item.Resumen,
+                description: item.Descripcion,
+                assignedGroup: item.Grupo_Asignado,
+                assignee: item.Ususario_Asignado,
+                client: item.Cliente,
+                ticketType: item.tipo_ticket
             }
         })
         return data;
@@ -21,33 +23,48 @@ export const mapToTicketData = (rawData: TicketRaw[]): Ticket[] => {
     }
 }
 
-export const mapReqToFileFormat = (data: AllocateTicketReq): TicketRaw => {
+export const mapReqToTicketData = (data: AllocateTicketReq): Ticket => {
     return {
-        "Mostrar ID": data.id ?? '',
-        "Fecha deseada": "",
-        "Estado de SLM": "Dentro del Objetivo",
-        "Nombre completo de cliente": "OD",
-        Assignee: data.assignee,
-        Resumen: data.resume ?? "Incidente",
-        Estado: data.status ?? "Asignado",
-        "Fecha de última actualización": new Date().toDateString(),
-        "Fecha de resolución": "",
-        "Fecha de creación": "",
+        id: data.id || `INC${generateRandomId()}`,
+        assignee: data.assignee,
+        assignedGroup: data.assignedGroup || "",
+        client: data.client || "",
+        description: data.description || "",
+        priority: mappedPriority(data.priority || "Baja"),
+        status: mappedStatus(data.status || "Abierto"),
+        summary: data.summary || "",
+        ticketType: data.ticketType || "",
+        creationDate: new Date().toISOString(),
+        isCritical: data.isCritical || false
     }
-} 
+}
 
-const slmMapper = (rawSlm: string): SLM  => {
-    return rawSlm.includes('Advertencia') ? SLM.WARNING : SLM.ONTIME
-} 
+const generateRandomId = (): string => {
+    return Math.random().toString(36).substr(2, 9);
+}
 
-const statusMapper = (rawStatus: string): TICKET_STATUS => {
+const mappedPriority = (rawPriority: string): Priority => {
+    switch (rawPriority) {
+        case "Baja":
+            return Priority.LOW
+        case "Media":
+            return Priority.MEDIUM
+        case "Alta":
+            return Priority.HIGH
+        default:
+            throw new Error(`Unknown priority: ${rawPriority}`)
+    }
+}
+
+const mappedStatus = (rawStatus: string): TicketStatus => {
     switch (rawStatus) {
         case "Asignado":
-            return TICKET_STATUS.ASSIGNED
-        case "En curso":
-            return TICKET_STATUS.ONGOING
+            return TicketStatus.ASSIGNED
+        case "Abierto":
+            return TicketStatus.OPEN
+        case "En Progreso":
+            return TicketStatus.IN_PROGRESS
         default:
-            return TICKET_STATUS.UNKNOWN 
-            
+            throw new Error(`Unknown status: ${rawStatus}`)
     }
 }

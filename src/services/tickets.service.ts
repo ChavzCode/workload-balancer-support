@@ -1,65 +1,66 @@
-import { FIB_TICKER_EFFORT, PERCENTAGE_INCREASE_ON_WARNING } from "../core/constants/effort.constants";
+import {
+  FIB_TICKER_EFFORT,
+  PERCENTAGE_INCREASE_ON_WARNING,
+} from "../core/constants/effort.constants";
 import { ONE_HUNDRED, TWO, ZERO } from "../core/constants/numbers.constants";
-import { mapReqToFileFormat, mapToTicketData } from "../core/mappers/tickets-data.mapper";
-import { getFileData, writeOnFile } from "../core/utils/files.util"
 import { sortingFn } from "../core/utils/sort.util";
-import { AllocateTicketReq, SLM, Ticket, TicketRaw, TicketsWorkload } from "../models/tickets-data.model";
+import { Ticket } from "../models/tickets-data.model";
+import { TicketsWorkload } from "../models/workload-data.model";
 
-export const getTicketsData = (): TicketsWorkload[] => {
-    const records: TicketRaw[] = getFileData('data/tickets.csv');
-    const mappedData: Ticket[] = mapToTicketData(records);
+export const groupTicketsByAssignee = (
+  tickets: Ticket[]
+): TicketsWorkload[] => {
+  const ticketsByMember: { [key: string]: Ticket[] } = {};
 
-    const ticketsByMember: { [key: string]: Ticket[] } = {}
-    mappedData.forEach((ticket) => {
-        if (!ticketsByMember[ticket.assignee]) {
-            ticketsByMember[ticket.assignee] = [];
-        };
-        ticketsByMember[ticket.assignee].push(ticket);
-    })
+  tickets.forEach((ticket) => {
+    if (!ticketsByMember[ticket.assignee]) {
+      ticketsByMember[ticket.assignee] = [];
+    }
+    ticketsByMember[ticket.assignee].push(ticket);
+  });
 
+  const ticketsWorkload: TicketsWorkload[] = Object.entries(
+    ticketsByMember
+  ).map((entry) => {
+    const [assignee, tickets] = entry;
 
-    const ticketsWorkload: TicketsWorkload[] = Object.entries(ticketsByMember).map((entry) => {
-        const [assignee, tickets] = entry;
+    return {
+      assignee,
+      ticketsAssigned: tickets.length,
+      estimatedEffort: calculateTicketEffort(tickets),
+      complianceRisk: calculateComplianceRisk(tickets),
+      assigneeTickets: tickets,
+    };
+  });
 
-        return {
-            assignee,
-            ticketsAssigned: tickets.length,
-            estimatedEffort: calculateTicketEffort(tickets),
-            complianceRisk: calculateComplianceRisk(tickets),
-            assigneeTickets: tickets
-        }
-    })
-    
-    return sortingFn(ticketsWorkload, "estimatedEffort") ?? ticketsWorkload
-}
+  return sortingFn(ticketsWorkload, "estimatedEffort") ?? ticketsWorkload;
+};
 
-export const getTicketsComplianceRisk = (): TicketsWorkload[] => {
-    return getTicketsData().filter((tickets) => tickets.complianceRisk)
-}
-
-export const allocateTicketResponsability = (data: AllocateTicketReq ) => {
-    const ticket: TicketRaw = mapReqToFileFormat(data);
-
-    writeOnFile('data/tickets.csv', ticket);
-
-    return true;
-}
+export const getTicketsComplianceRisk = (
+  tickets: Ticket[]
+): TicketsWorkload[] => {
+  return groupTicketsByAssignee(tickets).filter(
+    (tickets) => tickets.complianceRisk
+  );
+};
 
 const calculateTicketEffort = (tickets: Ticket[]): number => {
-    let totalEffort = ZERO;
+  let totalEffort = ZERO;
 
-    tickets.forEach((item) => {
-        let ticketEffort = FIB_TICKER_EFFORT;
-        if (item.slm === SLM.WARNING) {
-            ticketEffort = ticketEffort + (ticketEffort * (PERCENTAGE_INCREASE_ON_WARNING / ONE_HUNDRED))
-        }
-        totalEffort += ticketEffort;
-    })
+  tickets.forEach((item) => {
+    let ticketEffort = FIB_TICKER_EFFORT;
+    if (item.isCritical) {
+      ticketEffort =
+        ticketEffort +
+        ticketEffort * (PERCENTAGE_INCREASE_ON_WARNING / ONE_HUNDRED);
+    }
+    totalEffort += ticketEffort;
+  });
 
-    return totalEffort;
-}
+  return totalEffort;
+};
 
 const calculateComplianceRisk = (tickets: Ticket[]): boolean => {
-    const ticketsOnRisk = tickets.filter((i) => i.slm === SLM.WARNING);
-    return ticketsOnRisk.length > (tickets.length / TWO);
-}
+  const ticketsOnRisk = tickets.filter((i) => i.isCritical);
+  return ticketsOnRisk.length > tickets.length / TWO;
+};

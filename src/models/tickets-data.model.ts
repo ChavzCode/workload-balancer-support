@@ -1,47 +1,44 @@
-export interface TicketRaw {
-    "Mostrar ID": string;
-    "Fecha deseada": string;
-    "Estado de SLM": string;
-    "Nombre completo de cliente": string;
-    Assignee: string;
-    Resumen: string;
+export interface TicketFromCSV {
+    NumeroCaso: string;
+    Prioridad: 'Baja' | 'Media' | 'Alta';
+    Incidencia_Grave: 'Si' | 'No';
+    Fecha_Apertura: string;
     Estado: string;
-    "Fecha de última actualización": string;
-    "Fecha de resolución": string;
-    "Fecha de creación": string;
+    Resumen: string;
+    Descripcion: string;
+    Grupo_Asignado: string;
+    Ususario_Asignado: string;
+    Cliente: string;
+    tipo_ticket: string;
 }
+
 
 export interface Ticket {
-    id: string;
-    slm: SLM;
-    client: string;
-    assignee: string;
-    resume: string;
-    status: TICKET_STATUS;
-    lastUpdate: string;
-    resolutionDate: string;
-    creationDate: string;
+    id: string;                // NumeroCaso
+    priority: Priority;        // Prioridad
+    isCritical: boolean;      // Incidencia_Grave
+    creationDate: string;     // Fecha_Apertura
+    status: TicketStatus;     // Estado
+    summary: string;          // Resumen
+    description: string;      // Descripcion
+    assignedGroup: string;    // Grupo_Asignado
+    assignee: string;         // Ususario_Asignado
+    client: string;          // Cliente
+    ticketType: string;      // tipo_ticket
 }
 
-export interface TicketsWorkload {
-    assignee: string;
-    ticketsAssigned: number;
-    estimatedEffort: number;
-    complianceRisk: boolean;
-    assigneeTickets: Ticket[];
-}
-
-export interface AllocateTicketReq extends Partial<Omit<Ticket, "creationDate" | "client" | "resolutionDate" | "lastUpdate">> {
+export interface AllocateTicketReq extends Partial<Ticket> {
     assignee: string
 }
 
-export enum SLM {
-    ONTIME = "ontime",
-    WARNING = "warning"
+export enum Priority {
+    LOW = "Baja",
+    MEDIUM = "Media",
+    HIGH = "Alta"
 }
 
-export enum TICKET_STATUS {
-    ASSIGNED = "assigned",
-    ONGOING = "ongoing",
-    UNKNOWN = "unknown"
-} 
+export enum TicketStatus {
+    ASSIGNED = "Asignado",
+    OPEN = "Abierto",
+    IN_PROGRESS = "En Progreso"
+}
