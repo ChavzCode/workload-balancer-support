@@ -1,18 +1,20 @@
-import express from 'express';
+import express from "express";
 
-import balancerRoutes from './routes/balancer.routes';
-import ticketsRoutes from './routes/tickets.routes'
-import defaultRoutes from './routes/default.routes';
-import assignmentRoutes from "./routes/assignments.routes"
+import balancerRoutes from "./routes/balancer.routes";
+import ticketsRoutes from "./routes/tickets.routes";
+import assignmentRoutes from "./routes/assignments.routes";
+import teamRoutes from "./routes/team.routes";
+import defaultRoutes from "./routes/default.routes";
 
 const app = express();
 
 app.use(express.json());
 
-app.use('/workload', balancerRoutes);
-app.use('/tickets', ticketsRoutes)
-app.use('/assignments', assignmentRoutes);
-app.use(defaultRoutes)
+app.use("/workload", balancerRoutes);
+app.use("/tickets", ticketsRoutes);
+app.use("/assignments", assignmentRoutes);
+app.use("/team", teamRoutes);
+app.use(defaultRoutes);
 
 // // Global error handler (should be after routes)
 // app.use(errorHandler);

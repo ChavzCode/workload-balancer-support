@@ -1,13 +1,13 @@
 export interface TeamMember {
   name: string;
   status: MEMBER_STATUS,
-  ticketEffortAllocation: ALLOCATION_SCALE
+  ticketEffortAllocation: number
 }
 
 export enum MEMBER_STATUS {
   NORMAL = "normal",
   VACATION = "vacation",
-  LOW_RUN = "low_run",
+  SICK = "sick",
   NO_TICKETS = "no_tickets"
 }
 
